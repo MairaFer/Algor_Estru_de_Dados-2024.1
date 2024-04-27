@@ -6,45 +6,36 @@ import Questao1_AgainDenovo.*;
 public class Md5 {
 
     public static String calcularHash(String mensagem) {
-        // Inicialização das variáveis do hash
         int[] s = { 0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476 };
         int[] k = new int[64];
         for (int i = 0; i < 64; i++) {
             k[i] = (int) (long) ((1L << 32) * Math.abs(Math.sin(i + 1)));
         }
 
-        // Preparação da mensagem
         byte[] mensagemBytes = mensagem.getBytes();
         int mensagemBits = mensagemBytes.length * 8;
 
-        // Adicionando o bit '1' ao final da mensagem
         mensagem = mensagem.concat(Character.toString((char) 0b10000000));
 
-        // Adicionando bits '0' até que o tamanho da mensagem seja congruente a 448 (mod 512)
         while (mensagem.length() % 512 != 448) {
             mensagem = mensagem.concat(Character.toString((char) 0));
         }
 
-        // Adicionando os 64 bits da representação do tamanho original da mensagem
         String tamanho = Integer.toBinaryString(mensagemBits);
         while (tamanho.length() < 64) {
             tamanho = "0" + tamanho;
         }
         mensagem = mensagem.concat(tamanho);
 
-        // Processamento da mensagem em blocos de 512 bits
         for (int i = 0; i < mensagem.length() / 512; i++) {
-            // Divisão da mensagem em palavras de 32 bits
             int[] palavras = new int[16];
             for (int j = 0; j < 16; j++) {
                 String palavraBin = mensagem.substring(i * 512 + j * 32, i * 512 + (j + 1) * 32);
                 palavras[j] = Integer.parseUnsignedInt(palavraBin, 2);
             }
 
-            // Inicialização dos registradores
             int[] a = s.clone();
 
-            // Processamento dos blocos
             for (int j = 0; j < 64; j++) {
                 int f, g;
                 if (j < 16) {
@@ -68,13 +59,11 @@ public class Md5 {
                 a[0] = temp;
             }
 
-            // Adição do resultado ao hash
             for (int j = 0; j < 4; j++) {
                 s[j] += a[j];
             }
         }
 
-        // Formatação do hash final
         StringBuilder hash = new StringBuilder();
         for (int i = 0; i < 4; i++) {
             hash.append(String.format("%08x", s[i]));
@@ -109,7 +98,7 @@ public class Md5 {
 
             String linha;
             while ((linha = br.readLine()) != null) {
-                String original = tabela.buscarOriginal(linha); // Busca a linha original a partir do hash
+                String original = tabela.buscarOriginal(linha);
                 bw.write(original);
                 bw.newLine();
             }
