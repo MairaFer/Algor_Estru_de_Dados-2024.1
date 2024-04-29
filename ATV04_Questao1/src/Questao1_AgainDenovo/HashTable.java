@@ -5,6 +5,9 @@ import java.io.FileReader;
 import java.io.IOException;
 
 public class HashTable {
+    private static final int INITIAL_CAPACITY = 16;
+    private static final double LOAD_FACTOR_THRESHOLD = 0.75;
+
 
     Lista<Lista<String>> elementos;
     int max;
@@ -13,37 +16,37 @@ public class HashTable {
     public HashTable() {
         qtdElementos = 0;
         elementos = new Lista<>();
-        max = 10;
+        max = INITIAL_CAPACITY;
         iniciaLista(elementos);
     }
 
     private void iniciaLista(Lista<Lista<String>> elementos) {
-        for (int i = 0; i < max; i++) {
+        for (int i = 0; i < INITIAL_CAPACITY; i++) {
             elementos.inserir(new Lista<>(), i);
         }
     }
 
     private int gerarPosicao(String frase) {
-        return Hash.of(frase) % max;
+        return Math.abs(frase.hashCode()) % max;
     }
 
     public void inserir(String chave) {
-        if ((double) quantidadeElementos() / elementos.tamanho() >= 0.75) {
+        if ((double) quantidadeElementos() / elementos.tamanho() >= LOAD_FACTOR_THRESHOLD) {
             resize();
         }
         int posicao = gerarPosicao(chave);
         Lista<String> lista = elementos.buscar(posicao);
         lista.inserir(chave);
+        qtdElementos++;
     }
 
 
-
     public void inserirDeArquivo(String path) {
-        String palavra = "";
+        // String palavra = "";
         try (BufferedReader br = new BufferedReader(new FileReader("src\\Entrada\\" + path + ".txt"))) {
-            while (br.ready()) {
-                palavra = br.readLine();
-                inserir(palavra);
+            String linha;
+            while ((linha = br.readLine()) != null) {
+                inserir(linha);
             }
         } catch (IOException e) {
             System.out.println("Arquivo não encontrado");
@@ -71,9 +74,9 @@ public class HashTable {
     public boolean buscar(String frase) {
         int posicao = gerarPosicao(frase);
         Lista<String> listaElemento = elementos.buscar(posicao);
-        int hashFrase = Hash.of(frase);
+        int hashFrase = frase.hashCode();
         for (int i = 0; i < listaElemento.tamanho(); i++) {
-            if (Hash.of(listaElemento.buscar(i)) == hashFrase) {
+            if (listaElemento.buscar(i).hashCode() == hashFrase) {
                 System.out.println(listaElemento.buscar(i));
                 return true;
             }
@@ -99,6 +102,7 @@ public class HashTable {
                 if (frase != null) {
                     inserir(frase);
                 }
+
             }
         }
     }
@@ -106,8 +110,9 @@ public class HashTable {
     public String buscarOriginal(String chave) {
         int posicao = gerarPosicao(chave);
         Lista<String> listaElemento = elementos.buscar(posicao);
+        int hashChave = chave.hashCode();
         for (int i = 0; i < listaElemento.tamanho(); i++) {
-            if (String.valueOf(Hash.of(listaElemento.buscar(i))).equals(chave)) {
+            if (listaElemento.buscar(i).hashCode() == hashChave) {
                 return listaElemento.buscar(i);
             }
         }

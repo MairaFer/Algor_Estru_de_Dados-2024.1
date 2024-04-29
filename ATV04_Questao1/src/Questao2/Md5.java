@@ -1,11 +1,13 @@
 package Questao2;
 
 import java.io.*;
+
 import Questao1_AgainDenovo.*;
 
 public class Md5 {
 
     public static String calcularHash(String mensagem) {
+        System.out.println("Mensagem antes do padding: " + mensagem);
         int[] s = { 0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476 };
         int[] k = new int[64];
         for (int i = 0; i < 64; i++) {
@@ -15,22 +17,25 @@ public class Md5 {
         byte[] mensagemBytes = mensagem.getBytes();
         int mensagemBits = mensagemBytes.length * 8;
 
-        mensagem = mensagem.concat(Character.toString((char) 0b10000000));
+        mensagem += (char) 0b10000000;
 
-        while (mensagem.length() % 512 != 448) {
-            mensagem = mensagem.concat(Character.toString((char) 0));
+        while ((mensagem.length() + 64) % 512 != 0) {
+            mensagem += (char) 0;
         }
 
         String tamanho = Integer.toBinaryString(mensagemBits);
         while (tamanho.length() < 64) {
             tamanho = "0" + tamanho;
         }
-        mensagem = mensagem.concat(tamanho);
+        mensagem += tamanho;
+
+        System.out.println("Mensagem após o padding: " + mensagem);
 
         for (int i = 0; i < mensagem.length() / 512; i++) {
             int[] palavras = new int[16];
             for (int j = 0; j < 16; j++) {
                 String palavraBin = mensagem.substring(i * 512 + j * 32, i * 512 + (j + 1) * 32);
+
                 palavras[j] = Integer.parseUnsignedInt(palavraBin, 2);
             }
 
@@ -71,16 +76,19 @@ public class Md5 {
         return hash.toString();
     }
 
+
     public static void main(String[] args) {
         HashTable tabela = new HashTable();
 
         try {
-            BufferedReader br = new BufferedReader(new FileReader("src\\Entrada\\Entrada1.txt"));
-            BufferedWriter bw = new BufferedWriter(new FileWriter("src\\Saida\\Saida1.txt"));
+            BufferedReader br = new BufferedReader(new FileReader("Entrada1.txt"));
+            BufferedWriter bw = new BufferedWriter(new FileWriter("Saida1.txt"));
 
             String linha;
             while ((linha = br.readLine()) != null) {
+                System.out.println("Calculando hash para a linha: " + linha);
                 String hash = calcularHash(linha); // Calcula o hash da linha
+                System.out.println("Hash calculado: " + hash);
                 tabela.inserir(linha);
                 bw.write(hash);
                 bw.newLine();
@@ -93,12 +101,14 @@ public class Md5 {
         }
 
         try {
-            BufferedReader br = new BufferedReader(new FileReader("src\\Entrada\\Entrada2.txt"));
-            BufferedWriter bw = new BufferedWriter(new FileWriter("src\\Saida\\Saida2.txt"));
+            BufferedReader br = new BufferedReader(new FileReader("Entrada2.txt"));
+            BufferedWriter bw = new BufferedWriter(new FileWriter("Saida2.txt"));
 
             String linha;
             while ((linha = br.readLine()) != null) {
+                System.out.println("Buscando original para o hash: " + linha);
                 String original = tabela.buscarOriginal(linha);
+                System.out.println("Original encontrado: " + original);
                 bw.write(original);
                 bw.newLine();
             }
